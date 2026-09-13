@@ -1,0 +1,1 @@
+# MacroSuite Installer Releases`n`nRelease assets are published here.
