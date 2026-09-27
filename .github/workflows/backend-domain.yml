@@ -1,0 +1,42 @@
+# MacroSuite 서버 도메인 동기화.
+# Vercel API 로 운영 도메인을 확인해 backend.json(앱이 시작할 때 읽는 공개 안내 파일)을 최신으로 둔다.
+# 도메인이 바뀌면 30분 안에 안내 파일이 바뀌고, 앱은 다음 시작 때 새 주소를 쓴다.
+name: 서버 도메인 동기화
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/scripts/sync-backend-domain.mjs', '.github/workflows/backend-domain.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backend-domain
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vercel 도메인 확인
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          AUTH0_MGMT_CLIENT_ID: ${{ secrets.AUTH0_MGMT_CLIENT_ID }}
+          AUTH0_MGMT_CLIENT_SECRET: ${{ secrets.AUTH0_MGMT_CLIENT_SECRET }}
+        run: node .github/scripts/sync-backend-domain.mjs
+      - name: 바뀌었으면 올리기
+        run: |
+          if git diff --quiet -- backend.json; then echo "바뀐 것 없음"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend.json
+          git commit -m "서버 도메인 안내 갱신: $(node -p "require('./backend.json').backendUrl")"
+          git push
