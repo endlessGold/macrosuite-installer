@@ -1,11 +1,9 @@
 # MacroSuite 서버 도메인 동기화.
 # Vercel API 로 운영 도메인을 확인해 backend.json(앱이 시작할 때 읽는 공개 안내 파일)을 최신으로 둔다.
-# 도메인이 바뀌면 몇 분 안에 Auth0 복귀 주소와 안내 파일이 바뀌고, 앱은 다음 시작 때 새 주소를 쓴다.
+# 평소에는 서버가 요청 이벤트로 맞춘다(macrosuite-backend api/domain-sync.ts). 이 작업은 손으로 돌리는 점검용이다.
 name: 서버 도메인 동기화
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
