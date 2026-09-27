@@ -1,11 +1,11 @@
 # MacroSuite 서버 도메인 동기화.
 # Vercel API 로 운영 도메인을 확인해 backend.json(앱이 시작할 때 읽는 공개 안내 파일)을 최신으로 둔다.
-# 도메인이 바뀌면 30분 안에 안내 파일이 바뀌고, 앱은 다음 시작 때 새 주소를 쓴다.
+# 도메인이 바뀌면 몇 분 안에 Auth0 복귀 주소와 안내 파일이 바뀌고, 앱은 다음 시작 때 새 주소를 쓴다.
 name: 서버 도메인 동기화
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -33,6 +33,8 @@ jobs:
           AUTH0_MGMT_CLIENT_SECRET: ${{ secrets.AUTH0_MGMT_CLIENT_SECRET }}
         run: node .github/scripts/sync-backend-domain.mjs
       - name: 바뀌었으면 올리기
+        # Auth0 단계가 실패해도 새 주소는 올린다 — 작업 자체는 실패로 남아 알림이 간다.
+        if: ${{ !cancelled() }}
         run: |
           if git diff --quiet -- backend.json; then echo "바뀐 것 없음"; exit 0; fi
           git config user.name "github-actions[bot]"
