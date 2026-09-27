@@ -9,7 +9,10 @@
 //      (넘겨주기 전용·브랜치 전용·미인증 도메인은 뺀다. 사용자 도메인이 있으면 그것, 없으면 가장 짧은 *.vercel.app)
 //   2. 그 도메인의 /health 가 MacroSuite 서버인지 확인 — 아니면 파일을 바꾸지 않고 실패한다.
 //   3. backend.json 이 다르면 고쳐 쓴다(같으면 그대로 — 커밋할 것이 없다).
-//   4. (선택) Auth0 관리 API 자격이 있으면 새 도메인의 로그인 복귀 주소 세 개를 Auth0 에 더한다(있는 값은 지우지 않는다).
+//   4. (선택) Auth0 관리 API 자격이 있으면 새 도메인의 로그인 복귀 주소 세 개를 Auth0 에 더하고,
+//      *.vercel.app 에 있는 우리 경로의 복귀 주소 중 살아 있는 MacroSuite 서버가 아닌 것은 뺀다.
+//      Vercel 에서 풀린 *.vercel.app 이름은 남이 가져갈 수 있다 — 그 주소가 복귀 주소로 남아 있으면
+//      남이 우리 앱 이름으로 로그인 코드를 받아 갈 수 있다. 로컬 주소(127.0.0.1)·그 밖의 도메인은 건드리지 않는다.
 //
 // 환경변수
 //   VERCEL_TOKEN (필수)            Vercel 계정 토큰
@@ -48,6 +51,24 @@ export function pickProductionDomain(domains) {
   return [...pool].sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name))[0].name.toLowerCase()
 }
 
+/**
+ * 뺄 복귀 주소 — *.vercel.app 이고 우리 경로(CALLBACK_PATHS)이며 지금 도메인이 아니고, 그 서버가 MacroSuite 로 응답하지 않는 것.
+ * isLive(origin) 는 주입한다(테스트). 확인하지 못한 것(네트워크 오류 등)은 "죽음"으로 본다 — 모름을 살아 있음으로 바꾸지 않는다.
+ */
+export async function staleCallbacks(callbacks, currentOrigin, isLive) {
+  const stale = []
+  const checked = new Map()
+  for (const value of callbacks) {
+    let url
+    try { url = new URL(value) } catch { continue }
+    if (url.protocol !== 'https:' || !url.hostname.endsWith('.vercel.app') || url.origin === currentOrigin) continue
+    if (!CALLBACK_PATHS.includes(url.pathname)) continue
+    if (!checked.has(url.origin)) checked.set(url.origin, await isLive(url.origin))
+    if (!checked.get(url.origin)) stale.push(value)
+  }
+  return stale
+}
+
 async function vercelDomains(token) {
   const url = `https://api.vercel.com/v9/projects/${encodeURIComponent(PROJECT)}/domains?slug=${encodeURIComponent(TEAM)}&limit=100`
   const response = await fetch(url, { headers: { authorization: `Bearer ${token}` } })
@@ -84,14 +105,18 @@ async function syncAuth0(origin) {
   if (!Array.isArray(current.callbacks)) { report(`Auth0: 지금 복귀 주소를 읽지 못했습니다(${current.error ?? '모양이 다름'}).`); return false }
   const wanted = CALLBACK_PATHS.map(path => origin + path)
   const missing = wanted.filter(url => !current.callbacks.includes(url))
-  if (missing.length === 0) { report('Auth0: 새 도메인의 로그인 복귀 주소가 이미 모두 등록돼 있습니다.'); return true }
-  const patched = await fetch(clientUrl, { method: 'PATCH', headers, body: JSON.stringify({ callbacks: [...current.callbacks, ...missing] }) })
-  if (!patched.ok) { report(`Auth0: 복귀 주소를 더하지 못했습니다(${patched.status}).`); return false }
+  const stale = await staleCallbacks(current.callbacks, origin, isMacroSuite)
+  if (missing.length === 0 && stale.length === 0) { report('Auth0: 새 도메인의 로그인 복귀 주소가 이미 모두 등록돼 있고, 죽은 주소도 없습니다.'); return true }
+  const next = [...current.callbacks.filter(url => !stale.includes(url)), ...missing]
+  const patched = await fetch(clientUrl, { method: 'PATCH', headers, body: JSON.stringify({ callbacks: next }) })
+  if (!patched.ok) { report(`Auth0: 복귀 주소를 고치지 못했습니다(${patched.status}).`); return false }
   // 들어갔는지 다시 읽어 확인한다 — 성공 응답만 믿지 않는다.
   const after = await fetch(`${clientUrl}?fields=callbacks&include_fields=true`, { headers }).then(r => r.json()).catch(() => ({}))
   const stillMissing = wanted.filter(url => !(after.callbacks ?? []).includes(url))
-  if (stillMissing.length) { report(`Auth0: 더했다고 했지만 다시 읽으니 빠져 있습니다: ${stillMissing.join(', ')}`); return false }
-  report(`Auth0: 로그인 복귀 주소를 더했습니다: ${missing.join(', ')}`)
+  const stillStale = stale.filter(url => (after.callbacks ?? []).includes(url))
+  if (stillMissing.length || stillStale.length) { report(`Auth0: 고쳤다고 했지만 다시 읽으니 다릅니다(빠짐 ${stillMissing.length}, 남음 ${stillStale.length}).`); return false }
+  if (missing.length) report(`Auth0: 로그인 복귀 주소를 더했습니다: ${missing.join(', ')}`)
+  if (stale.length) report(`Auth0: 살아 있지 않은 복귀 주소를 뺐습니다: ${stale.join(', ')}`)
   return true
 }
 
