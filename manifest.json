@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "channel": "stable",
+  "uiVersion": "2026.09.28.10.38-65ae452",
+  "url": "https://raw.githubusercontent.com/endlessGold/macrosuite-installer/gui/",
+  "minimumRuntimeVersion": "0.1.0",
+  "publishedAt": "2026-09-28T10:38:26.704Z",
+  "files": [
+    {
+      "path": "assets/index-pGHis_4y.js",
+      "sha256": "cf0555df8f3d3c8241517e7d07566867d5e0c7998fd41f055db1ae8dbe8a472a",
+      "size": 978743
+    },
+    {
+      "path": "assets/index-wYI0xTAr.css",
+      "sha256": "38d8d1ccf1835b8e9eef09ef5468d5176ba21ef500218d2a946b26290a8e2532",
+      "size": 111037
+    },
+    {
+      "path": "favicon.svg",
+      "sha256": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66",
+      "size": 9522
+    },
+    {
+      "path": "index.html",
+      "sha256": "68b02cce2d9fd0da807849fba5d09818f80a9495497df18b0c38de969a2f97b5",
+      "size": 460
+    },
+    {
+      "path": "privacy.html",
+      "sha256": "f80373b8914625690be33106557dcc525bad02837a42b7947ac749d3f69b1445",
+      "size": 5232
+    },
+    {
+      "path": "terms.html",
+      "sha256": "cc5ae645fc5a7d862c02b160224ddf2538fe15a9d291ccdb9d6024ee02147b6b",
+      "size": 3935
+    }
+  ]
+}

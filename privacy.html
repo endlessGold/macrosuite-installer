@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>개인정보처리방침 — MacroSuite</title>
+<link rel="icon" href="/favicon.svg" />
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #5a5a5a; --line: #e3e3e3; --accent: #2b5fd9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14161a; --fg: #e8e8e8; --muted: #9aa0a6; --line: #2a2e35; --accent: #7aa2f7; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.75 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+  }
+  main { max-width: 46rem; margin: 0 auto; padding: 3rem 1rem 5rem; }
+  h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+  p, li { color: var(--fg); }
+  .lede { color: var(--muted); margin: 0 0 2rem; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .35rem 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; background: color-mix(in srgb, var(--fg) 8%, transparent); padding: .1em .35em; border-radius: .25em; }
+  a { color: var(--accent); }
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>개인정보처리방침</h1>
+  <p class="lede">MacroSuite · 최종 수정 2026-09-23</p>
+
+  <p>MacroSuite는 게임 위에 뜨는 매크로 오버레이입니다. 이 문서는 MacroSuite가 무엇을 수집하고, 어디에 두며, 언제 지우는지를 있는 그대로 적은 것입니다.</p>
+
+  <h2>1. 로그인할 때 받는 것</h2>
+  <p>로그인은 Auth0를 거쳐 Google 또는 GitHub 계정으로만 합니다. MacroSuite는 비밀번호를 받지도, 저장하지도, 볼 수도 없습니다. 로그인이 끝나면 다음을 받아 계정에 저장합니다.</p>
+  <ul>
+    <li>로그인 제공자와 그 제공자가 준 사용자 식별자 (예: <code>google-oauth2|…</code>, <code>github|…</code>)</li>
+    <li>표시 이름</li>
+    <li>이메일 주소 (제공자가 준 경우)</li>
+  </ul>
+  <p>이메일은 계정을 알아보고 문의에 답하는 용도로만 씁니다. 광고에 쓰지 않고, 제3자에게 팔거나 넘기지 않습니다.</p>
+
+  <h2>2. 서비스를 쓰는 동안 쌓이는 것</h2>
+  <ul>
+    <li><strong>세션</strong> — 로그인한 기기별로 세션 하나. 만든 시각, 만료 시각, 기기 구분용 임의 식별자를 둡니다. 이 식별자는 무작위 값이고 기기의 하드웨어 정보가 아닙니다.</li>
+    <li><strong>이용 등급과 권한</strong> — 어떤 기능을 쓸 수 있는지 판단하는 값입니다.</li>
+    <li><strong>매크로 스크립트</strong> — 서버에 저장하기를 선택한 것만. 저장하지 않으면 스크립트는 사용자 PC를 떠나지 않습니다.</li>
+    <li><strong>관리 기록</strong> — 운영자가 계정을 정지하거나 권한을 바꾸면 그 사실과 시각이 남습니다.</li>
+  </ul>
+
+  <h2>3. 수집하지 않는 것</h2>
+  <ul>
+    <li>키보드·마우스 입력 내용. 매크로가 보내는 키는 사용자 PC 안에서만 처리되고 서버로 가지 않습니다.</li>
+    <li>화면 캡처, 실행 중인 다른 프로그램의 내용.</li>
+    <li>위치 정보, 연락처, 결제 수단.</li>
+    <li>광고 식별자, 제3자 추적기. MacroSuite에는 분석 도구나 광고 SDK가 없습니다.</li>
+  </ul>
+
+  <h2>4. 어디에 두는가</h2>
+  <ul>
+    <li>계정·세션·권한: 관리형 데이터베이스 (아시아·태평양 리전).</li>
+    <li>서버에 저장한 매크로 스크립트: 비공개 저장소.</li>
+    <li>로그인 상태와 앱 설정: 사용자 PC의 <code>%LOCALAPPDATA%\MacroSuite</code>. 로그인 정보는 Windows의 사용자 계정 단위 암호화(DPAPI)로 암호화해 저장하며, 다른 사용자 계정에서는 복호화되지 않습니다.</li>
+  </ul>
+
+  <h2>5. 얼마나 두는가</h2>
+  <ul>
+    <li>세션: 만료되거나 로그아웃하면 무효가 됩니다.</li>
+    <li>계정과 그에 딸린 데이터: 계정을 지우면 함께 지웁니다.</li>
+    <li>로컬 파일: 앱에서 로그아웃하면 저장된 로그인 정보를 즉시 지웁니다.</li>
+  </ul>
+
+  <h2>6. 사용자가 할 수 있는 것</h2>
+  <ul>
+    <li>연결된 로그인 수단을 앱에서 확인하고, 추가하거나 해제할 수 있습니다.</li>
+    <li>다른 기기의 세션을 끊을 수 있습니다.</li>
+    <li>계정과 저장된 데이터의 삭제를 요청할 수 있습니다. 아래 연락처로 요청하면 처리합니다.</li>
+  </ul>
+
+  <h2>7. 문의</h2>
+  <p>개인정보와 관련한 문의·열람·삭제 요청은 <a href="mailto:levelhoon@gmail.com">levelhoon@gmail.com</a> 으로 보내 주세요.</p>
+
+  <h2>8. 변경</h2>
+  <p>이 방침이 바뀌면 이 페이지의 최종 수정 날짜를 갱신합니다.</p>
+
+  <footer>
+    <a href="/">MacroSuite</a> · <a href="/terms">서비스 약관</a>
+  </footer>
+</main>
+</body>
+</html>
